@@ -14,6 +14,11 @@ Thumbs.db
 # Logs
 *.log
 
+# Local conversation data (user-specific, not committed to source control)
+chat_log.json
+chat_log.json.bak
+
 # IDE settings
 .vscode/
 .idea/
+chat_log.json

@@ -55,6 +55,19 @@ Make sure you have the following installed:
 
 ---
 
+## Data Storage
+
+Your conversation log is stored **outside the repository** in your OS user-data directory — it is never inside the project folder and cannot be accidentally committed.
+
+| Platform | Path |
+|---|---|
+| Windows | `%APPDATA%\echobot\chat_log.json` |
+| Linux / Mac | `~/.local/share/echobot/chat_log.json` |
+
+To restore a backup, place your `chat_log.json` file at the path above for your platform.
+
+---
+
 ## Installation
 
 1. **Clone the repository:**
@@ -73,7 +86,7 @@ Make sure you have the following installed:
 3. **Run EchoBot:**
 
     ```bash
-    python -m src.views.cli
+    python run.py
     ```
 
 ---
@@ -85,7 +98,7 @@ Make sure you have the following installed:
 1. Run the CLI:
 
     ```bash
-    python -m src.views.cli
+    python run.py
     ```
 
 2. Select **Option 1** from the main menu.
@@ -97,12 +110,21 @@ Make sure you have the following installed:
 1. Run the CLI:
 
     ```bash
-    python -m src.views.cli
+    python run.py
     ```
 
 2. Select **Option 2** from the main menu.
 3. When prompted, enter the number of recent summaries you would like to view.
 4. The CLI will display the requested summaries along with their timestamps.
+
+---
+
+## Scripts
+
+| Script | Command | Description |
+|---|---|---|
+| Run EchoBot | `python run.py` | Start the CLI |
+| Clean cache | `python clean.py` | Recursively delete all `__pycache__` folders |
 
 ---
 
@@ -130,6 +152,32 @@ Contributions are welcome! If you would like to contribute:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Changelog
+
+### [2026-03-17]
+
+#### Added
+- `echobotSummaryId` auto-incremented integer field added to every log entry; IDs are assigned by `LogRepository` on save and persisted in `chat_log.json`.
+- `totalSummaryCount` root node added to `chat_log.json`; updated atomically on every write to always reflect the total number of summaries stored.
+- Two new unit tests in `tests/test_log_repository.py`: `test_auto_increment_ids` and `test_total_summary_count`.
+- `run.py` root-level entry point — run the app with `python run.py` instead of `python -m src.views.cli`.
+- `clean.py` utility script — recursively removes all `__pycache__` directories from the project with `python clean.py`.
+- `src/config.py` — `get_data_path()` resolves the OS-appropriate user-data directory (`%APPDATA%\echobot\` on Windows, `~/.local/share/echobot/` on Linux/Mac) so the data file is stored outside the repo entirely.
+
+#### Security
+- `chat_log.json` now stored outside the repository in the OS user-data directory; can never be accidentally committed regardless of `.gitignore` state.
+
+#### Changed
+- `chat_log.json` structure migrated from a bare array to a root object `{ "totalSummaryCount": N, "entries": [...] }`; all existing entries backfilled with sequential `echobotSummaryId` values (1–end).
+- `LogRepository` refactored to use `_read_store()` / `_write_store()` helpers, replacing the previous `r+` / `seek(0)` pattern that could corrupt the file on a shorter write.
+- `LogEntry.from_dict()` uses `.get("echobotSummaryId", 0)` for safe backwards-compatible deserialization.
+
+#### Fixed
+- Missing `from datetime import datetime` import in `tests/test_log_repository.py` that caused a `NameError` when running the test suite.
+- `chat_log.json` and `chat_log.json.bak` added to `.gitignore` to prevent local conversation data from being committed to source control.
 
 ---
 
