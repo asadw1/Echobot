@@ -21,26 +21,19 @@ echobot/
 ├── setup.py                # For packaging and distribution (if needed)
 ├── requirements.txt        # List of dependencies
 ├── src/                    # Source code
-│   ├── __init__.py
 │   ├── main.py             # Application entry point
 │   ├── config.py           # Configuration settings
 │   ├── models/             # Data models
-│   │   ├── __init__.py
 │   │   └── log_entry.py    # Data model for conversation logs
 │   ├── storage/            # Data storage and retrieval
-│   │   ├── __init__.py
 │   │   └── log_repository.py  # Handles saving and retrieving logs
 │   ├── services/           # Core application logic
-│   │   ├── __init__.py
 │   │   └── summarizer.py   # Handles summarization and retrieval tasks
 │   ├── utils/              # Utility functions
-│   │   ├── __init__.py
 │   │   └── logger.py       # Logging utilities (optional)
 │   └── views/              # User interface
-│       ├── __init__.py
 │       └── cli.py          # Command-line interface
 └── tests/                  # Unit tests
-    ├── __init__.py
     └── test_log_repository.py  # Tests for the log repository
 ```
 
@@ -52,19 +45,6 @@ Make sure you have the following installed:
 
 - **Python 3.8 or later**
 - **pip** for dependency management
-
----
-
-## Data Storage
-
-Your conversation log is stored **outside the repository** in your OS user-data directory — it is never inside the project folder and cannot be accidentally committed.
-
-| Platform | Path |
-|---|---|
-| Windows | `%APPDATA%\echobot\chat_log.json` |
-| Linux / Mac | `~/.local/share/echobot/chat_log.json` |
-
-To restore a backup, place your `chat_log.json` file at the path above for your platform.
 
 ---
 
@@ -165,10 +145,6 @@ This project is licensed under the [MIT License](LICENSE).
 - Two new unit tests in `tests/test_log_repository.py`: `test_auto_increment_ids` and `test_total_summary_count`.
 - `run.py` root-level entry point — run the app with `python run.py` instead of `python -m src.views.cli`.
 - `clean.py` utility script — recursively removes all `__pycache__` directories from the project with `python clean.py`.
-- `src/config.py` — `get_data_path()` resolves the OS-appropriate user-data directory (`%APPDATA%\echobot\` on Windows, `~/.local/share/echobot/` on Linux/Mac) so the data file is stored outside the repo entirely.
-
-#### Security
-- `chat_log.json` now stored outside the repository in the OS user-data directory; can never be accidentally committed regardless of `.gitignore` state.
 
 #### Changed
 - `chat_log.json` structure migrated from a bare array to a root object `{ "totalSummaryCount": N, "entries": [...] }`; all existing entries backfilled with sequential `echobotSummaryId` values (1–end).
